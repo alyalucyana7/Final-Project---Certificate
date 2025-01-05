@@ -1,0 +1,151 @@
+/* Reset */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: Arial , sans-serif;
+}
+
+body {
+    display: flex;
+    height: 100vh;
+    background: #f4f4f4;
+}
+
+/* Tivicate */
+.sidebar {
+    width: 250px;
+    background: #607d9a;
+    color: #fff;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 20px;
+}
+
+
+.sidebar .logo {
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+.sidebar .logo img {
+    width: 150px; /* Sesuaikan ukuran logo */
+    height: auto;
+    margin-bottom: 20px;
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.sidebar .logo h3 {
+    font-size: 18px;
+    font-weight: bold;
+}
+
+.sidebar .logo p {
+    font-size: 12px;
+    font-style: italic;
+}
+
+.sidebar ul {
+    list-style: none;
+    width: 100%;
+}
+
+.sidebar ul li {
+    margin: 15px 0;
+}
+
+.sidebar ul li a {
+    text-decoration: none;
+    color: #fff;
+    display: flex;
+    align-items: center;
+    font-size: 16px;
+    padding: 10px 20px;
+    border-radius: 5px;
+    transition: background 0.3s ease;
+}
+
+.sidebar ul li a i {
+    margin-right: 10px; /* Menambahkan jarak antara ikon dan teks */
+    font-size: 15px; /* Ukuran ikon */
+}
+
+.sidebar ul li a:hover {
+    background: #40566a;
+}
+
+.sidebar ul li .icon {
+    margin-right: 10px;
+}
+
+/* Pemisah Garis */
+.sidebar ul hr {
+    border: none;
+    border-top: 1px solid #b0c4de;
+    margin: 10px 0;
+}
+
+/* Main Content */
+.main-content {
+    flex-grow: 1;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+}
+
+.topbar {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    padding: 10px;
+    background: #fff;
+    border-bottom: 1px solid #ddd;
+    margin-bottom: 20px;
+}
+
+.topbar .user-name {
+    margin-right: 10px;
+    font-size: 16px;
+    font-weight: bold;
+}
+
+.topbar .profile-pic {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+}
+
+/* Content Area */
+.content {
+    flex-grow: 1;
+    background: #fff;
+    border-radius: 5px;
+    padding: 20px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+.page-title  {
+    font-family: poppins , sans-serif;
+}
+
+.active {
+    color: #fff;
+    background-color: #4CAF50;
+    text-decoration: none;
+}
+
+/* Footer */
+.footer {
+    text-align: center;
+    padding: 10px;
+    background-color: #f8f9fa; /* Warna background footer */
+    color: #6c757d; /* Warna teks */
+    position: fixed; /* Menempel di bagian bawah */
+    bottom: 0; /* Jarak dari bawah */
+    width: 80%; /* Lebar penuh */
+    border-top: 1px solid #ddd; /* Garis atas untuk memisahkan footer */
+    font-size: 14px; /* Ukuran teks */
+}
