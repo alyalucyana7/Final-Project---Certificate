@@ -40,7 +40,6 @@ $data_kegiatan = mysqli_fetch_assoc($query_kegiatan);
             display: flex;
             flex-direction: column;
             min-height: 100vh;
-            margin: 0;
         }
 
         .sidebar {
@@ -48,29 +47,143 @@ $data_kegiatan = mysqli_fetch_assoc($query_kegiatan);
             top: 0;
             left: 0;
             height: 100vh;
-            z-index: 1000; /* Pastikan sidebar selalu berada di atas */
+            width: 250px;
+            background: #607d9a;
+            color: #fff;
+            transition: transform 0.3s ease-in-out;
+            z-index: 1000;
+        }
+
+        .sidebar.hidden {
+            transform: translateX(-250px);
+        }
+
+        .sidebar .logo img {
+            max-width: 100%;
+            height: auto;
         }
 
         .main-content {
             margin-left: 250px;
-            min-height: 100vh;
-            background: #fff;
+            transition: margin-left 0.3s ease-in-out;
+        }
+
+        .main-content.full {
+            margin-left: 0;
+        }
+
+        .menu-toggle {
+            position: absolute;
+            top: 15px;
+            left: 15px;
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            color: #fff;
+            z-index: 1100;
+            transition: left 0.3s ease-in-out;
+        }
+
+        .sidebar.show ~ .menu-toggle {
+            left: 265px;
+        }
+
+        @media (max-width: 768px) {
+            .sidebar {
+                transform: translateX(-250px);
+            }
+
+            .sidebar.show {
+                transform: translateX(0);
+            }
+
+            .main-content {
+                margin-left: 0;
+            }
+
+            .menu-toggle {
+                display: block;
+                color: #343a40;
+            }
+
+            .sidebar.show ~ .menu-toggle {
+                left: 265px;
+            }
+        }
+
+        @media (min-width: 769px) {
+            .menu-toggle {
+                display: none;
+            }
         }
 
         .content {
-            flex-grow: 1;
-            background: #fff;
-            border-radius: 5px;
-            padding: 20px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-            margin-bottom: 0px; /* Tambahkan margin bawah agar tidak menabrak footer */
+            overflow-x: auto;
         }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th, td {
+            white-space: nowrap;
+        }
+
+        td:last-child {
+            max-width: 120px;
+        }
+        
+        .dataTables_wrapper .dataTables_length label {
+            display: flex !important; /* Gunakan flex untuk memastikan label rapi */
+            align-items: center; /* Pusatkan dropdown secara vertikal */
+            gap: 0.5rem; /* Atur jarak antar elemen */
+        }
+        
+        @media (max-width: 768px) {
+            .dataTables_wrapper .dataTables_length {
+                display: block !important; /* Buat satu baris di layar kecil */
+            }
+        }
+
+        .dataTables_wrapper .dataTables_filter {
+            float: right; /* Kolom pencarian di kanan */
+            margin-bottom: 1rem;
+        }
+        
+        .dataTables_wrapper .dataTables_info {
+            float: left; /* Informasi pagination di kiri bawah */
+            margin-top: 1rem;
+        }
+        
+        .dataTables_wrapper .dataTables_paginate {
+            float: right; /* Navigasi "Previous/Next" di kanan bawah */
+            margin-top: 1rem;
+        }
+        
+        /* Atur tabel agar tetap responsif */
+        table.dataTable {
+            width: 100%;
+        }
+        
+        /* Membuat kontainer tabel dengan scroll horizontal */
+        .content .table-container {
+            overflow-x: auto; /* Scroll horizontal */
+            -webkit-overflow-scrolling: touch; /* Smooth scrolling untuk perangkat mobile */
+        }
+
+        /* Pastikan tabel tidak memengaruhi elemen lain */
+        .content .table-container table {
+            width: 100%; /* Optional: Supaya tabel menyesuaikan */
+            min-width: 600px; /* Optional: Tetapkan lebar minimum */
+        }
+
 
         .footer {
             background-color: #f8f9fa;
             text-align: center;
             padding: 10px 0;
-            margin-top: auto; /* Membuat footer berada di bagian bawah */
+            margin-top: auto;
             box-shadow: 0 -1px 5px rgba(0, 0, 0, 0.1);
             z-index: 10;
             position: relative;
@@ -81,7 +194,7 @@ $data_kegiatan = mysqli_fetch_assoc($query_kegiatan);
     
 </head>
 <body>
-    <div class="sidebar">
+    <div class="sidebar" id="sidebar">
         <div class="logo">
             <img src="./images/dkm.jpeg" alt="Tivicate Logo">
             <hr>
@@ -96,8 +209,11 @@ $data_kegiatan = mysqli_fetch_assoc($query_kegiatan);
         </ul>
     </div>
 
-
-    <div class="main-content">
+    <button class="menu-toggle btn btn-primary ms-2 btn-lg" type="button" onclick="toggleSidebar()" style="background-color: #0d6efd; border-color: #0d6efd; color: white;">
+        <i class="bi bi-list"></i>
+    </button> 
+    
+    <div class="main-content" id="main-content">
         <div class="topbar">
             <span class="user-name"><?php include './backend/profil_user.php'; ?></span>
             <img src="./images/profil.png" alt="Admin Profile" class="profile-pic">
@@ -172,49 +288,61 @@ $data_kegiatan = mysqli_fetch_assoc($query_kegiatan);
                     </div>
                 </div>  
         <br>
-            <!-- Table -->
-            <table id="dataPeserta" class="table table-striped">
-                <thead>
-                    <tr>
-                        <th>No</th>
-                        <th>Nama Peserta</th>
-                        <th>No Hp</th>
-                        <th>Email</th>
-                        <th>Alamat</th>
-                        <th>Status</th>
-                        <th>Tindakan</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <?php
-                        require './config/db.php';
-
-                        // Ambil id_kegiatan dari request (pastikan nilai ini berasal dari input yang valid)
-                        $id_kegiatan = $_GET['id']; // Misalnya, id_kegiatan diterima dari URL
-                        
-                        // Query untuk memfilter peserta berdasarkan id_kegiatan
-                        $peserta = mysqli_query($db_connect, "SELECT * FROM peserta WHERE id_kegiatan = '$id_kegiatan'");
-                        $no = 1;
-
-                        while($row = mysqli_fetch_assoc($peserta)) {
-                    ?>
+            <div class="table-container">
+                <!-- Table -->
+                <table id="dataPeserta" class="table table-striped">
+                    <thead>
                         <tr>
-                            <td><?= $no++; ?></td>
-                            <td><?= $row['nama_peserta']; ?></td>
-                            <td><?= $row['no_telepon']; ?></td>
-                            <td><?= $row['email']; ?></td>
-                            <td><?= $row['alamat']; ?></td>
-                            <td><?= $row['status']; ?></td>
-                            <td>
-                                <a href="generate_certificate.php?id_peserta=<?= $row['id_peserta']; ?>" class="btn btn-success btn-sm"><i class="bi bi-file-pdf"></i></a>
-                                <a href="javascript:void(0);" class="btn btn-danger btn-sm" onclick="confirmDelete('delete_peserta.php?id_peserta=<?= $row['id_peserta']; ?>&id=<?= $id_kegiatan; ?>')"><i class="bi bi-trash3"></i></a>
-                            </td>
+                            <th>No</th>
+                            <th>Nama Peserta</th>
+                            <th>No Hp</th>
+                            <th>Email</th>
+                            <th>Alamat</th>
+                            <th>Status</th>
+                            <th>Tindakan</th>
                         </tr>
-                    <?php } ?>
-                </tbody>
-            </table>
+                    </thead>
+                    <tbody>
+                        <?php
+                            require './config/db.php';
+    
+                            // Ambil id_kegiatan dari request (pastikan nilai ini berasal dari input yang valid)
+                            $id_kegiatan = $_GET['id']; // Misalnya, id_kegiatan diterima dari URL
+                            
+                            // Query untuk memfilter peserta berdasarkan id_kegiatan
+                            $peserta = mysqli_query($db_connect, "SELECT * FROM peserta WHERE id_kegiatan = '$id_kegiatan'");
+                            $no = 1;
+    
+                            while($row = mysqli_fetch_assoc($peserta)) {
+                        ?>
+                            <tr>
+                                <td><?= $no++; ?></td>
+                                <td><?= $row['nama_peserta']; ?></td>
+                                <td><?= $row['no_telepon']; ?></td>
+                                <td><?= $row['email']; ?></td>
+                                <td><?= $row['alamat']; ?></td>
+                                <td><?= $row['status']; ?></td>
+                                <td>
+                                    <a href="generate_certificate.php?id_peserta=<?= $row['id_peserta']; ?>" class="btn btn-success btn-sm"><i class="bi bi-file-pdf"></i></a>
+                                    <a href="javascript:void(0);" class="btn btn-danger btn-sm" onclick="confirmDelete('delete_peserta.php?id_peserta=<?= $row['id_peserta']; ?>&id=<?= $id_kegiatan; ?>')"><i class="bi bi-trash3"></i></a>
+                                </td>
+                            </tr>
+                        <?php } ?>
+                    </tbody>
+                </table>
+            </div>
+            <br>
         </div>
     </div>
+    
+    <script>
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            const mainContent = document.getElementById('main-content');
+            sidebar.classList.toggle('show');
+            mainContent.classList.toggle('full');
+        }
+    </script>
 
     <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/js/bootstrap.bundle.min.js"></script>
